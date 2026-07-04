@@ -40,36 +40,24 @@ export function createTerrain(seed: number, size = 500, segments = 128): THREE.M
 }
 
 export function createSky(scene: THREE.Scene): void {
-  scene.background = new THREE.Color(0x0a0a1a)
-  scene.fog = new THREE.FogExp2(0x0a0a1a, 0.012)
+  scene.background = new THREE.Color(0x87ceeb)
+  scene.fog = new THREE.FogExp2(0xc9e8f5, 0.008)
 
-  const ambientLight = new THREE.AmbientLight(0x111133, 0.8)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.2)
   scene.add(ambientLight)
 
-  const moonLight = new THREE.DirectionalLight(0x8888cc, 0.6)
-  moonLight.position.set(50, 80, 30)
-  moonLight.castShadow = true
-  moonLight.shadow.mapSize.set(2048, 2048)
-  moonLight.shadow.camera.near = 0.5
-  moonLight.shadow.camera.far = 500
-  moonLight.shadow.camera.left = -100
-  moonLight.shadow.camera.right = 100
-  moonLight.shadow.camera.top = 100
-  moonLight.shadow.camera.bottom = -100
-  scene.add(moonLight)
+  const sunLight = new THREE.DirectionalLight(0xfff4d0, 1.8)
+  sunLight.position.set(80, 120, 60)
+  sunLight.castShadow = true
+  sunLight.shadow.mapSize.set(2048, 2048)
+  sunLight.shadow.camera.near = 0.5
+  sunLight.shadow.camera.far = 500
+  sunLight.shadow.camera.left = -150
+  sunLight.shadow.camera.right = 150
+  sunLight.shadow.camera.top = 150
+  sunLight.shadow.camera.bottom = -150
+  scene.add(sunLight)
 
-  const starGeometry = new THREE.BufferGeometry()
-  const starCount = 3000
-  const positions = new Float32Array(starCount * 3)
-  for (let i = 0; i < starCount; i++) {
-    const theta = Math.random() * Math.PI * 2
-    const phi = Math.acos(Math.random() * 2 - 1)
-    const r = 300
-    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta)
-    positions[i * 3 + 1] = r * Math.abs(Math.cos(phi)) + 50
-    positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta)
-  }
-  starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5 })
-  scene.add(new THREE.Points(starGeometry, starMaterial))
+  const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x4a7c3f, 0.6)
+  scene.add(hemiLight)
 }

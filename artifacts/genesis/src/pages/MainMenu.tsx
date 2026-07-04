@@ -150,7 +150,15 @@ export default function MainMenu({ onEnterWorld }: Props) {
               <div className="text-xs text-emerald-400">ИИ готов — Genesis может думать</div>
             )}
             {aiStatus === 'error' && (
-              <div className="text-xs text-red-400">{getAiErrorText()}</div>
+              <div className="flex flex-col gap-2">
+                <div className="text-xs text-red-400">{getAiErrorText()}</div>
+                <button
+                  onClick={initAI}
+                  className="text-xs text-yellow-300 bg-yellow-900/30 hover:bg-yellow-800/40 border border-yellow-800/50 rounded px-3 py-1.5 transition-colors self-start"
+                >
+                  ↻ Повторить загрузку
+                </button>
+              </div>
             )}
             {aiStatus === 'idle' && (
               <div className="text-xs text-zinc-500">Инициализация...</div>
