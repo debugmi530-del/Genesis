@@ -37,8 +37,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Remove lockfile for fresh platform-specific resolution
+        run: node -e "try{require('fs').rmSync('pnpm-lock.yaml')}catch(e){}"
+
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Build Vite renderer
         run: pnpm --filter @workspace/genesis run build:electron
