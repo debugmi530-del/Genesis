@@ -1,5 +1,6 @@
 appId: com.genesis.game
 productName: Genesis
+executableName: Genesis
 copyright: Genesis
 
 directories:
@@ -39,4 +40,5 @@ linux:
     - target: AppImage
       arch: [x64]
   icon: build-resources/icon.png
+  executableName: Genesis
   category: Game
