@@ -15,8 +15,6 @@ files:
 extraMetadata:
   main: electron/main.js
 
-publish: never
-
 win:
   target:
     - target: nsis
