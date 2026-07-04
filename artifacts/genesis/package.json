@@ -3,10 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "A self-evolving 3D AI-driven world simulation",
+  "author": "Genesis",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/debugmi530-del/Genesis.git"
+  },
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
-    "build:electron": "ELECTRON_BUILD=true vite build --config vite.config.ts",
+    "build:electron": "vite build --config vite.config.ts",
     "electron:build": "electron-builder",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit"
