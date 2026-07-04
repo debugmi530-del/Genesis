@@ -12,6 +12,12 @@ export type AICommand =
   | { action: 'player_ability'; ability: string; description: string }
   | { action: 'world_message'; message: string }
 
+export type AIInitError =
+  | 'webgpu_not_supported'
+  | 'webgpu_no_adapter'
+  | 'network_error'
+  | 'unknown'
+
 interface WebLLMEngine {
   chat: {
     completions: {
@@ -55,20 +61,47 @@ export class GenesisAI {
   private engine: WebLLMEngine | null = null
   private isInitialized = false
   private isGenerating = false
+  lastInitError: AIInitError | null = null
 
   async initialize(
     onProgress: (progress: number, message: string) => void
   ): Promise<void> {
-    const webllm = await import('@mlc-ai/web-llm')
-    this.engine = new webllm.MLCEngine() as WebLLMEngine
+    // Step 1: check WebGPU availability before downloading anything
+    if (typeof navigator === 'undefined' || !navigator.gpu) {
+      this.lastInitError = 'webgpu_not_supported'
+      throw new Error('webgpu_not_supported')
+    }
 
-    await this.engine.reload(MODEL_ID, {
-      initProgressCallback: (p) => {
-        onProgress(Math.round(p.progress * 100), p.text)
-      },
-    })
+    onProgress(0, 'Проверка GPU...')
+    const adapter = await navigator.gpu.requestAdapter()
+    if (!adapter) {
+      this.lastInitError = 'webgpu_no_adapter'
+      throw new Error('webgpu_no_adapter')
+    }
+
+    // Step 2: load WebLLM and start model download
+    onProgress(1, 'Инициализация движка...')
+    try {
+      const webllm = await import('@mlc-ai/web-llm')
+      this.engine = new webllm.MLCEngine() as WebLLMEngine
+
+      await this.engine.reload(MODEL_ID, {
+        initProgressCallback: (p) => {
+          onProgress(Math.round(p.progress * 100), p.text)
+        },
+      })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      if (msg.includes('fetch') || msg.includes('network') || msg.includes('load')) {
+        this.lastInitError = 'network_error'
+        throw new Error('network_error')
+      }
+      this.lastInitError = 'unknown'
+      throw e
+    }
 
     this.isInitialized = true
+    this.lastInitError = null
   }
 
   async generateCommand(worldState: WorldState, playerAction?: string): Promise<AICommand | null> {

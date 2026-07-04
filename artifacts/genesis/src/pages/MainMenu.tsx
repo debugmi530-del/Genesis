@@ -68,6 +68,14 @@ export default function MainMenu({ onEnterWorld }: Props) {
     }
   }
 
+  function getAiErrorText(): string {
+    const err = genesisAI.lastInitError
+    if (err === 'webgpu_not_supported') return 'WebGPU недоступен — обновите драйверы видеокарты или запустите игру заново'
+    if (err === 'webgpu_no_adapter') return 'Видеокарта не поддерживает WebGPU — нужна DirectX 12 совместимая GPU'
+    if (err === 'network_error') return 'Ошибка сети при загрузке модели — проверьте интернет и перезапустите'
+    return 'Ошибка ИИ — перезапустите игру или обновите драйверы видеокарты'
+  }
+
   async function handleNewWorld() {
     const name = newWorldName.trim() || `Мир ${worlds.length + 1}`
     const world = saveManager.createNewWorld(name)
@@ -142,7 +150,7 @@ export default function MainMenu({ onEnterWorld }: Props) {
               <div className="text-xs text-emerald-400">ИИ готов — Genesis может думать</div>
             )}
             {aiStatus === 'error' && (
-              <div className="text-xs text-red-400">Ошибка ИИ — нужна поддержка WebGPU (Chrome/Edge)</div>
+              <div className="text-xs text-red-400">{getAiErrorText()}</div>
             )}
             {aiStatus === 'idle' && (
               <div className="text-xs text-zinc-500">Инициализация...</div>

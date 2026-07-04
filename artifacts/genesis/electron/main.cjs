@@ -1,9 +1,15 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron')
 const path = require('path')
 
-app.commandLine.appendSwitch('enable-features', 'WebGPU,WebGPUDeveloperFeatures')
+// WebGPU: must be set before app is ready
+app.commandLine.appendSwitch('enable-features', 'WebGPU,WebGPUDeveloperFeatures,Vulkan,UseSkiaRenderer')
+app.commandLine.appendSwitch('enable-unsafe-webgpu')
 app.commandLine.appendSwitch('ignore-gpu-blocklist')
+app.commandLine.appendSwitch('disable-gpu-sandbox')
 app.commandLine.appendSwitch('enable-gpu-rasterization')
+app.commandLine.appendSwitch('use-angle', 'd3d11')
+app.commandLine.appendSwitch('enable-zero-copy')
+app.commandLine.appendSwitch('ignore-certificate-errors')
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -18,6 +24,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       webSecurity: false,
+      allowRunningInsecureContent: true,
     },
   })
 
