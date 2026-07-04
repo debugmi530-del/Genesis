@@ -37,8 +37,28 @@ jobs:
         with:
           node-version: 22
 
-      - name: Remove lockfile for fresh platform-specific resolution
-        run: node -e "try{require('fs').rmSync('pnpm-lock.yaml')}catch(e){}"
+      - name: Remove Replit-specific platform restrictions for CI
+        run: |
+          node -e "
+          const fs = require('fs');
+
+          // Remove lockfile so pnpm resolves fresh for the current platform
+          try { fs.rmSync('pnpm-lock.yaml'); } catch(e) {}
+
+          // Remove .npmrc — it pins supportedArchitectures to linux-only for Replit
+          try { fs.rmSync('.npmrc'); } catch(e) {}
+
+          // Strip the overrides section from pnpm-workspace.yaml.
+          // That section excludes win32/darwin native binaries of rollup, esbuild,
+          // tailwindcss/oxide and lightningcss to save space on Replit (linux-x64 only).
+          // On CI each runner needs its own platform binary.
+          let ws = fs.readFileSync('pnpm-workspace.yaml', 'utf8');
+          const idx = ws.indexOf('\noverrides:');
+          if (idx !== -1) ws = ws.slice(0, idx);
+          fs.writeFileSync('pnpm-workspace.yaml', ws);
+
+          console.log('CI platform setup done');
+          "
 
       - name: Install dependencies
         run: pnpm install
