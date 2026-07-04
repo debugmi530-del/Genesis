@@ -36,15 +36,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
+
+      - name: Run post-install scripts
+        run: pnpm rebuild
 
       - name: Build Vite renderer
         run: pnpm --filter @workspace/genesis run build:electron
         env:
-          ELECTRON_BUILD: "true"
           PORT: "3000"
           BASE_PATH: "./"
 
