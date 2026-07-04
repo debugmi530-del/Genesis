@@ -13,7 +13,7 @@ files:
   - package.json
 
 extraMetadata:
-  main: electron/main.js
+  main: electron/main.cjs
 
 win:
   target:
@@ -27,18 +27,3 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Genesis
-
-mac:
-  target:
-    - target: dmg
-      arch: [x64, arm64]
-  icon: build-resources/icon.icns
-  category: public.app-category.games
-
-linux:
-  target:
-    - target: AppImage
-      arch: [x64]
-  icon: build-resources/icon.png
-  executableName: Genesis
-  category: Game

@@ -9,19 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            platform: win
-          - os: macos-latest
-            platform: mac
-          - os: ubuntu-latest
-            platform: linux
-
-    runs-on: ${{ matrix.os }}
+  build-windows:
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -42,16 +31,9 @@ jobs:
           node -e "
           const fs = require('fs');
 
-          // Remove lockfile so pnpm resolves fresh for the current platform
           try { fs.rmSync('pnpm-lock.yaml'); } catch(e) {}
-
-          // Remove .npmrc — it pins supportedArchitectures to linux-only for Replit
           try { fs.rmSync('.npmrc'); } catch(e) {}
 
-          // Strip the overrides section from pnpm-workspace.yaml.
-          // That section excludes win32/darwin native binaries of rollup, esbuild,
-          // tailwindcss/oxide and lightningcss to save space on Replit (linux-x64 only).
-          // On CI each runner needs its own platform binary.
           let ws = fs.readFileSync('pnpm-workspace.yaml', 'utf8');
           const idx = ws.indexOf('\noverrides:');
           if (idx !== -1) ws = ws.slice(0, idx);
@@ -69,20 +51,7 @@ jobs:
           PORT: "3000"
           BASE_PATH: "./"
 
-      - name: Build Electron (Linux)
-        if: matrix.platform == 'linux'
-        run: pnpm --filter @workspace/genesis run electron:build -- --linux --publish never
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Electron (macOS)
-        if: matrix.platform == 'mac'
-        run: pnpm --filter @workspace/genesis run electron:build -- --mac --publish never
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build Electron (Windows)
-        if: matrix.platform == 'win'
         run: pnpm --filter @workspace/genesis run electron:build -- --win --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -97,16 +66,8 @@ jobs:
           body: |
             Автоматическая сборка из последнего коммита в `main`.
 
-            | Платформа | Файл |
-            |-----------|------|
-            | Windows | `.exe` — установщик |
-            | macOS | `.dmg` — образ диска (Intel + Apple Silicon) |
-            | Linux | `.AppImage` — портативный запуск |
-
-            > Это pre-release, обновляется автоматически при каждом пуше.
+            **Windows:** скачайте `.exe` — установщик NSIS
           files: |
             artifacts/genesis/dist/electron/*.exe
-            artifacts/genesis/dist/electron/*.dmg
-            artifacts/genesis/dist/electron/*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
