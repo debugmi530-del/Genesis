@@ -28,7 +28,6 @@ interface WebLLMEngine {
       }) => Promise<{ choices: Array<{ message: { content: string } }> }>
     }
   }
-  reload: (modelId: string, config?: { initProgressCallback?: (p: { progress: number; text: string }) => void }) => Promise<void>
 }
 
 const SYSTEM_PROMPT = `Ты — Genesis, живой творец миров. Ты создаёшь, изменяешь и развиваешь симуляцию живого 3D-мира от первого лица.
@@ -80,16 +79,15 @@ export class GenesisAI {
     }
 
     // Step 2: load WebLLM and start model download
+    // initProgressCallback must be passed to CreateMLCEngine, not to reload()
     onProgress(1, 'Инициализация движка...')
     try {
       const webllm = await import('@mlc-ai/web-llm')
-      this.engine = new webllm.MLCEngine() as WebLLMEngine
-
-      await this.engine.reload(MODEL_ID, {
-        initProgressCallback: (p) => {
+      this.engine = await webllm.CreateMLCEngine(MODEL_ID, {
+        initProgressCallback: (p: { progress: number; text: string }) => {
           onProgress(Math.round(p.progress * 100), p.text)
         },
-      })
+      }) as WebLLMEngine
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
       if (msg.includes('fetch') || msg.includes('network') || msg.includes('load')) {
