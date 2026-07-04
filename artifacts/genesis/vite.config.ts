@@ -3,10 +3,11 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
-const isElectron = process.env.ELECTRON_BUILD === 'true'
 const rawPort = process.env.PORT
 const port = rawPort ? Number(rawPort) : 19321
-const basePath = isElectron ? './' : (process.env.BASE_PATH || '/')
+const rawBase = process.env.BASE_PATH || '/'
+const isElectron = rawBase === './'
+const basePath = rawBase
 
 export default defineConfig({
   base: basePath,
